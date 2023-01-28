@@ -1,5 +1,12 @@
 # Conways Game
 
+## Getting started
+
+1. Install dotnet core
+1. Run `dotnet build` in solution workspace to get all packages
+1. Run `dotnet test` in solution workspace to run all tests
+1. Run `dotnet run --project ConwaysGame` in solution workspace to run program
+
 ## Rules
 
 The next state of each space on the grid is determined by the current state of it's surrounding grid.
