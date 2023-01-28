@@ -25,22 +25,20 @@ public class ConwaysGameTests
         // given
         var startGrid = new List<List<bool>>{
             new List<bool> { false, false, false},
-            new List<bool> { true, true, true},
+            new List<bool> { true,  true,  true},
             new List<bool> { false, false, false},
         };
 
-        var expectecdGrid = new List<List<bool>>{
-            new List<bool> { false, false, false},
-            new List<bool> { true, true, true},
-            new List<bool> { false, false, false},
+        var expectedGrid = new List<List<bool>>{
+            new List<bool> { false, true, false},
+            new List<bool> { false, true, false},
+            new List<bool> { false, true, false},
         };
 
-        // When 
-
+        // When
         var endGrid = ConwaysGameClass.Transition(startGrid);
 
         // Then
-        endGrid.Should().BeEquivalentTo(startGrid, "grid s were not the same");
-
+        endGrid.Should().BeEquivalentTo(expectedGrid);
     }
 }
