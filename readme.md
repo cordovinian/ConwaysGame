@@ -1,32 +1,27 @@
-# ConwaysGame
+# Conways Game
 
-## What is this template?
+## Rules
 
-Contains:
+The next state of each space on the grid is determined by the current state of it's surrounding grid.
 
-- Main project
-- Test Project with FluentAssertions
+- Any live cell at time T with < 2 live neighbors dies (by underpopulation)
+- Any live cell at time T  with exactly 2 or 3 live neighbors survives
+- Any live cell at time T with > 3 live neighbors dies (by overpopulation)
+- Any dead cell with exactly 3 live neighbors becomes alive (by reproduction)
 
-Steps:
+## Interface
+
+Implement the following interface:
 
 ```
-dotnet new sln
-dotnet new console -n ConwaysGame
-dotnet new xunit -n ConwaysGameTests
-dotnet add ConwaysGameTests package FluentAssertions
-dotnet add ConwaysGameTests reference ConwaysGame
-dotnet sln add ConwaysGame
-dotnet sln add ConwaysGameTests
-dotnet build
+# Transition exactly one timestep
+# Grid is a 2D array
+def trasition(old_state: Grid) -> Grid
 ```
 
-## Conways
+## Example
 
-Any live cell at time T with < 2 live neighbors dies (by underpopulation)
-Any live cell at time T  with exactly 2 or 3 live neighbors survives
-Any live cell at time T with > 3 live neighbors dies (by overpopulation)
-Any dead cell with exactly 3 live neighbors becomes alive (by reproduction)
-
+Starting Grid
 
 ```
 0, 0, 0
@@ -34,10 +29,14 @@ Any dead cell with exactly 3 live neighbors becomes alive (by reproduction)
 0, 0, 0
 ```
 
-Transition
+Post Transition Grid
 
 ```
-0, 1, 0 (done)
+0, 1, 0
 0, 1, 0
 0, 1, 0
 ```
+
+## Notes
+
+- We can assume the shape of the grid will remain retangular. Width of each row will be the same.
