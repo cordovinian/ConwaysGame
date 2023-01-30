@@ -124,7 +124,18 @@ namespace ConwaysGame
 
             if (inPlace)
             {
-                Console.Clear();
+                // NOTE: Shift console up rows (value + separator) plus header plus space
+                int newCursorRow = (Console.CursorTop - output.Length - 1) < 0 ? 0 : Console.CursorTop - output.Length - 1;
+                Console.SetCursorPosition(0, newCursorRow);
+
+                // Clear grid space
+                for (int i = 0; i < output.Length + 1; i++)
+                {
+                    var clearLineLength = i==0 ? Console.WindowWidth : output[0].Length;
+                    Console.WriteLine(new string(' ', clearLineLength));
+                }
+
+                Console.SetCursorPosition(0, newCursorRow);
             }
 
             if (!string.IsNullOrEmpty(header))
