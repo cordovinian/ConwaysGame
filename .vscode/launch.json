@@ -14,7 +14,7 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {
@@ -25,7 +25,7 @@
             "program": "${workspaceFolder}/ConwaysGame/bin/Debug/net7.0/ConwaysGame.dll",
             "args": ["--input", "./GridSamples/Oscillator-Blinker.txt"],
             "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {
@@ -36,7 +36,7 @@
             "program": "${workspaceFolder}/ConwaysGame/bin/Debug/net7.0/ConwaysGame.dll",
             "args": ["--iterations", "10"],
             "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "stopAtEntry": false
         },
         {

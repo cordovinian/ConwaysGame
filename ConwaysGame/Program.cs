@@ -12,7 +12,9 @@ namespace ConwaysGame
         /// </summary>
         /// <param name="iterations">The number of game iterations to go through.</param>
         /// <param name="input">The name of the input file to set as the starting grid state.</param>
-        public static void Main(FileInfo input, int iterations=3)
+        /// <param name="inPlace">Enable to refresh grid in-place on console.</param>
+        /// <param name="refreshRate">How fast to recalculate next grid.</param>
+        public static void Main(FileInfo input, int iterations = 3, bool inPlace = false, int refreshRate = 1000)
         {
             var inputGrid = new List<List<int>>();
 
@@ -20,7 +22,7 @@ namespace ConwaysGame
             {
                 inputGrid = oscillatingBlinkerGrid;
 
-                PrintGrid(inputGrid, "Default grid state:");
+                WriteGrid(inputGrid, inPlace: false, "Default grid state:");
             }
             else if (input != null)
             {
@@ -32,13 +34,14 @@ namespace ConwaysGame
 
                 inputGrid = ParseGrid(input.FullName, null);
 
-                PrintGrid(inputGrid, $"Initial State from file '{input.Name}':");
+                WriteGrid(inputGrid, inPlace: false, $"Initial State from file '{input.Name}':");
             }
 
             for (var ii = 1; ii <= iterations; ii++)
             {
+                Thread.Sleep(refreshRate);
                 inputGrid = Transition(inputGrid);
-                PrintGrid(inputGrid, $"Step {ii}:");
+                WriteGrid(inputGrid, inPlace: inPlace, $"Step {ii}:");
             }
         }
 
@@ -88,12 +91,10 @@ namespace ConwaysGame
             return grid;
         }
 
-        private static void PrintGrid(List<List<int>> grid, string header = "Grid State:")
+        // Format the Grid type into a console output grid
+        private static string FormatGrid(List<List<int>> grid)
         {
-            if (!string.IsNullOrEmpty(header))
-            {
-                Console.WriteLine(header);
-            }
+            string output = string.Empty;
 
             foreach(var row in grid)
             {
@@ -110,8 +111,30 @@ namespace ConwaysGame
                 formattedDataRow = formattedDataRow.Remove(formattedDataRow.Length - 3, 2);
                 tableRow = tableRow.Remove(tableRow.Length - 3, 2);
 
-                Console.WriteLine(formattedDataRow);
-                Console.WriteLine(tableRow);
+                output += string.Concat(formattedDataRow, '\n');
+                output += string.Concat(tableRow, '\n');
+            }
+
+            return output;
+        }
+
+        private static void WriteGrid(List<List<int>> grid, bool inPlace = true, string header = "Grid State:")
+        {
+            var output = FormatGrid(grid).Split('\n');//, StringSplitOptions.RemoveEmptyEntries);
+
+            if (inPlace)
+            {
+                Console.Clear();
+            }
+
+            if (!string.IsNullOrEmpty(header))
+            {
+                Console.WriteLine(header);
+            }
+
+            foreach (var line in output)
+            {
+                Console.WriteLine(line);
             }
         }
 
