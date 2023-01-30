@@ -5,7 +5,8 @@
 1. Install dotnet core
 1. Run `dotnet build` in solution workspace to get all packages
 1. Run `dotnet test` in solution workspace to run all tests
-1. Run `dotnet run --project ConwaysGame` in solution workspace to run program
+1. Run `dotnet run --project ConwaysGame` in solution workspace to build and run program
+1. Run `dotnet run --project ConwaysGame -- -h` to see argument usage and help text
 
 ## Rules
 
@@ -27,6 +28,9 @@ def trasition(old_state: Grid) -> Grid
 ```
 
 ## Example
+
+Note: Known by the common oscillator pattern name "Blinker" this pattern will remain stable until acted upon by external influence.
+See [Conway Life Wiki: Common Objects](https://conwaylife.com/wiki/Common)
 
 Starting Grid
 

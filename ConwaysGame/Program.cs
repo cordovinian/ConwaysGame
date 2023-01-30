@@ -1,29 +1,99 @@
 ﻿using System;
+using System.CommandLine.DragonFruit;
+using System.IO;
 
 namespace ConwaysGame
 {
+    /// <summary>The main class for the program.</summary>
     public class ConwaysGameClass
     {
-        public static void Main(string[] args)
+        /// <summary>
+        /// Plays Conway's game of life for a number of iterations.
+        /// </summary>
+        /// <param name="iterations">The number of game iterations to go through.</param>
+        /// <param name="input">The name of the input file to set as the starting grid state.</param>
+        public static void Main(FileInfo input, int iterations=3)
         {
-            // TEMP: Start with a known grid
-            var grid = new List<List<int>>{
-                new List<int> { 0, 0, 0},
-                new List<int> { 1, 1, 1},
-                new List<int> { 0, 0, 0},
-            };
+            var inputGrid = new List<List<int>>();
 
-            PrintGrid(grid);
-
-            foreach(var iteration in Enumerable.Range(1,2))
+            if (input == null)
             {
-                PrintGrid(Transition(grid));
+                inputGrid = oscillatingBlinkerGrid;
+
+                PrintGrid(inputGrid, "Default grid state:");
+            }
+            else if (input != null)
+            {
+                if (!input.Exists)
+                {
+                    Console.Error.WriteLine($"Input file '{input.FullName}' does not exist!");
+                    return;
+                }
+
+                inputGrid = ParseGrid(input.FullName, null);
+
+                PrintGrid(inputGrid, $"Initial State from file '{input.Name}':");
+            }
+
+            for (var ii = 1; ii <= iterations; ii++)
+            {
+                inputGrid = Transition(inputGrid);
+                PrintGrid(inputGrid, $"Step {ii}:");
             }
         }
 
-        public static void PrintGrid(List<List<int>> grid)
+        private static List<List<int>> oscillatingBlinkerGrid = new List<List<int>>{
+                new List<int> { 0, 1, 0},
+                new List<int> { 0, 1, 0},
+                new List<int> { 0, 1, 0},
+            };
+
+        // Parses a text file as a grid.
+        private static List<List<int>> ParseGrid(string inputFileInfo, char[]? delimeters)
         {
-            Console.WriteLine("Grid state:");
+            delimeters = delimeters ?? new char[] {',', '\t', ';'};
+
+            var grid = new List<List<int>>();
+
+            int columnCount = 0;
+
+            foreach (var line in System.IO.File.ReadLines(inputFileInfo))
+            {
+                var splitLine = line.Split(delimeters, StringSplitOptions.TrimEntries);
+
+                if (splitLine.Length <=0)
+                {
+                    throw new Exception("Parsed values don't match the expected number of cells in the row");
+                }
+
+                columnCount = columnCount == 0 ? splitLine.Length : columnCount;
+
+                var row = new List<int>();
+
+                foreach (var cell in splitLine)
+                {
+                    int cellValue = 0;
+                    int.TryParse(cell, out cellValue);
+                    row.Add(cellValue);
+                }
+
+                if (row.Count != columnCount)
+                {
+                    throw new Exception("Parsed values don't match the expected number of cells in the row");
+                }
+
+                grid.Add(row);
+            }
+
+            return grid;
+        }
+
+        private static void PrintGrid(List<List<int>> grid, string header = "Grid State:")
+        {
+            if (!string.IsNullOrEmpty(header))
+            {
+                Console.WriteLine(header);
+            }
 
             foreach(var row in grid)
             {
@@ -45,7 +115,8 @@ namespace ConwaysGame
             }
         }
 
-        public static List<List<int>> Transition(List<List<int>> grid)
+        /// Method to analyze the current state of the game grid and transition to the next state.
+        protected static List<List<int>> Transition(List<List<int>> grid)
         {
             var finalGrid = new List<List<int>>();
 

@@ -1,10 +1,9 @@
 using ConwaysGame;
 using FluentAssertions;
-using System.Linq;
 
 namespace ConwaysGameTests;
 
-public class ConwaysGameTests
+public class ConwaysGameTests : ConwaysGameClass
 {
     [Fact]
     public void Transition_ReturnsCorrectGrid()
