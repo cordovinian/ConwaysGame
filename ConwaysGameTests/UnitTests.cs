@@ -7,32 +7,19 @@ namespace ConwaysGameTests;
 public class ConwaysGameTests
 {
     [Fact]
-    public void ReturnsTrueFunction_ReturnsTrue()
-    {
-        // Given
-        bool alwaysTrue;
-
-        // When
-        alwaysTrue = ConwaysGameClass.ReturnsTrueAlways();
-
-        // Then
-        alwaysTrue.Should().BeTrue();
-    }
-
-    [Fact]
     public void Transition_ReturnsCorrectGrid()
     {
         // given
-        var startGrid = new List<List<bool>>{
-            new List<bool> { false, false, false},
-            new List<bool> { true,  true,  true},
-            new List<bool> { false, false, false},
+        var startGrid = new List<List<int>>{
+            new List<int> { 0, 0, 0},
+            new List<int> { 1, 1, 1},
+            new List<int> { 0, 0, 0},
         };
 
-        var expectedGrid = new List<List<bool>>{
-            new List<bool> { false, true, false},
-            new List<bool> { false, true, false},
-            new List<bool> { false, true, false},
+        var expectedGrid = new List<List<int>>{
+            new List<int> { 0, 1, 0},
+            new List<int> { 0, 1, 0},
+            new List<int> { 0, 1, 0},
         };
 
         // When

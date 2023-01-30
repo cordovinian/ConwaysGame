@@ -7,10 +7,10 @@ namespace ConwaysGame
         public static void Main(string[] args)
         {
             // TEMP: Start with a known grid
-            var grid = new List<List<bool>>{
-                new List<bool> { false, false, false},
-                new List<bool> { true, true, true},
-                new List<bool> { false, false, false},
+            var grid = new List<List<int>>{
+                new List<int> { 0, 0, 0},
+                new List<int> { 1, 1, 1},
+                new List<int> { 0, 0, 0},
             };
 
             PrintGrid(grid);
@@ -21,9 +21,7 @@ namespace ConwaysGame
             }
         }
 
-        public static bool ReturnsTrueAlways() => true;
-
-        public static void PrintGrid(List<List<bool>> grid)
+        public static void PrintGrid(List<List<int>> grid)
         {
             Console.WriteLine("Grid state:");
 
@@ -34,8 +32,8 @@ namespace ConwaysGame
 
                 foreach(var col in row)
                 {
-                    formattedDataRow += String.Format($"{col, -5} | ");
-                    tableRow += (String.Format($"----- | "));
+                    formattedDataRow += String.Format($"{col, -1} | ");
+                    tableRow += (String.Format($"--|-"));
                 }
 
                 // Remove extra row separator before printing
@@ -47,22 +45,22 @@ namespace ConwaysGame
             }
         }
 
-        public static List<List<bool>> Transition(List<List<bool>> grid)
+        public static List<List<int>> Transition(List<List<int>> grid)
         {
-            var finalGrid = new List<List<bool>>();
+            var finalGrid = new List<List<int>>();
 
-            // Assume width is same for all rows
+            // ASSUME: width is same for all rows
             var row = grid.Count();
             var col = grid[0].Count();
 
             for (int rr = 0; rr < row; rr++)
             {
                 // Initialize new row in final grid
-                finalGrid.Add(new List<bool>(col));
+                finalGrid.Add(new List<int>(col));
 
                 for (int cc = 0; cc < col; cc++)
                 {
-                    var peers = new List<bool>(8);
+                    var peers = new List<int>(8);
 
                     if (rr - 1 >= 0)
                     {
@@ -97,26 +95,26 @@ namespace ConwaysGame
                         }
                     }
 
-                    var peerCount = peers.Count(x => x==true);
+                    var peerCount = peers.Count(x => x==1);
 
-                    if (grid[rr][cc] == true && peerCount < 2)
+                    if (grid[rr][cc] == 1 && peerCount < 2)
                     {
-                        finalGrid[rr].Add(false);
+                        finalGrid[rr].Add(0);
                     }
-                    else if (grid[rr][cc] == true && (peerCount == 2 || peerCount == 3))
+                    else if (grid[rr][cc] == 1 && (peerCount == 2 || peerCount == 3))
                     {
-                        finalGrid[rr].Add(true);
+                        finalGrid[rr].Add(1);
                     }
-                    else if (grid[rr][cc] == true && (peerCount >= 3))
+                    else if (grid[rr][cc] == 1 && (peerCount >= 3))
                     {
-                        finalGrid[rr].Add(false);
+                        finalGrid[rr].Add(0);
                     }
-                    else if (grid[rr][cc] == false && (peerCount == 3))
+                    else if (grid[rr][cc] == 0 && (peerCount == 3))
                     {
-                        finalGrid[rr].Add(true);
+                        finalGrid[rr].Add(1);
                     }
                     else {
-                        finalGrid[rr].Add(false);
+                        finalGrid[rr].Add(0);
                     }
                 }
             }
