@@ -1,128 +1,111 @@
 ﻿using System;
+using System.CommandLine.DragonFruit;
+using System.IO;
+using System.Text;
 
 namespace ConwaysGame
 {
+    /// <summary>The main class for the program.</summary>
     public class ConwaysGameClass
     {
-        public static void Main(string[] args)
+        private static List<List<int>> oscillatingBlinkerGrid = new List<List<int>>{
+            new List<int> { 0, 1, 0},
+            new List<int> { 0, 1, 0},
+            new List<int> { 0, 1, 0},
+        };
+
+        /// <summary>
+        /// Plays Conway's game of life for a number of iterations.
+        /// </summary>
+        /// <param name="input">The name of the input file to set as the starting grid state.</param>
+        /// <param name="iterations">The number of game iterations to go through.</param>
+        /// <param name="refreshRate">How fast to recalculate next grid.</param>
+        /// <param name="eachStep">Enable to display each iteration step.</param>
+        /// <param name="gridLines">Enable showing grid lines.</param>
+        /// <param name="boxLines">Enable showing bounding box lines.</param>
+        public static void Main(
+                                FileInfo input,
+                                int iterations = 20,
+                                int refreshRate = 100,
+                                bool eachStep = false,
+                                bool gridLines = false,
+                                bool boxLines = false)
         {
-            // TEMP: Start with a known grid
-            var grid = new List<List<bool>>{
-                new List<bool> { false, false, false},
-                new List<bool> { true, true, true},
-                new List<bool> { false, false, false},
-            };
+            var inputGrid = new Grid();
 
-            PrintGrid(grid);
+            Console.CursorVisible = false;
 
-            foreach(var iteration in Enumerable.Range(1,2))
+            if (input == null)
             {
-                PrintGrid(Transition(grid));
+                inputGrid = new Grid(oscillatingBlinkerGrid);
+
+                Console.WriteLine("Default Grid - 'Blinker'");
+                WriteGrid(inputGrid, "Default State:", eachStep: true, gridLines, boxLines);
             }
-        }
-
-        public static bool ReturnsTrueAlways() => true;
-
-        public static void PrintGrid(List<List<bool>> grid)
-        {
-            Console.WriteLine("Grid state:");
-
-            foreach(var row in grid)
+            else if (input != null)
             {
-                var formattedDataRow = string.Empty;
-                var tableRow = string.Empty;
-
-                foreach(var col in row)
+                if (!input.Exists)
                 {
-                    formattedDataRow += String.Format($"{col, -5} | ");
-                    tableRow += (String.Format($"----- | "));
+                    Console.Error.WriteLine($"Input file '{input.FullName}' does not exist!");
+                    return;
                 }
 
-                // Remove extra row separator before printing
-                formattedDataRow = formattedDataRow.Remove(formattedDataRow.Length - 3, 2);
-                tableRow = tableRow.Remove(tableRow.Length - 3, 2);
-
-                Console.WriteLine(formattedDataRow);
-                Console.WriteLine(tableRow);
-            }
-        }
-
-        public static List<List<bool>> Transition(List<List<bool>> grid)
-        {
-            var finalGrid = new List<List<bool>>();
-
-            // Assume width is same for all rows
-            var row = grid.Count();
-            var col = grid[0].Count();
-
-            for (int rr = 0; rr < row; rr++)
-            {
-                // Initialize new row in final grid
-                finalGrid.Add(new List<bool>(col));
-
-                for (int cc = 0; cc < col; cc++)
+                var gridParseResult = Grid.TryParseGrid(out inputGrid, input.FullName, null);
+                if (!gridParseResult || inputGrid == null)
                 {
-                    var peers = new List<bool>(8);
-
-                    if (rr - 1 >= 0)
-                    {
-                        if (cc-1 >= 0)
-                        {
-                            peers.Add(grid[rr - 1][cc - 1]);
-                        }
-                        peers.Add(grid[rr - 1][cc]);
-                        if (cc + 1 < col)
-                            peers.Add(grid[rr - 1][cc + 1]);
-                    }
-
-                    if (cc - 1 >= 0)
-                    {
-                        peers.Add(grid[rr][cc - 1]);
-                    }
-                    if (cc + 1 < col)
-                    {
-                        peers.Add(grid[rr][cc + 1]);
-                    }
-
-                    if (rr + 1 < row)
-                    {
-                        if (cc - 1 >= 0)
-                        {
-                            peers.Add(grid[rr + 1][cc - 1]);
-                        }
-                        peers.Add(grid[rr + 1][cc]);
-                        if (cc + 1 < col)
-                        {
-                            peers.Add(grid[rr + 1][cc + 1]);
-                        }
-                    }
-
-                    var peerCount = peers.Count(x => x==true);
-
-                    if (grid[rr][cc] == true && peerCount < 2)
-                    {
-                        finalGrid[rr].Add(false);
-                    }
-                    else if (grid[rr][cc] == true && (peerCount == 2 || peerCount == 3))
-                    {
-                        finalGrid[rr].Add(true);
-                    }
-                    else if (grid[rr][cc] == true && (peerCount >= 3))
-                    {
-                        finalGrid[rr].Add(false);
-                    }
-                    else if (grid[rr][cc] == false && (peerCount == 3))
-                    {
-                        finalGrid[rr].Add(true);
-                    }
-                    else {
-                        finalGrid[rr].Add(false);
-                    }
+                    Console.Error.WriteLine($"Failed to parse the file '{input.Name}' as a valid grid.");
+                    return;
                 }
+
+                Console.WriteLine($"From file - '{input.Name}'");
+                WriteGrid(inputGrid, $"Initial State:", eachStep: true, gridLines, boxLines);
             }
 
-            return finalGrid;
+            for (var ii = 1; ii <= iterations; ii++)
+            {
+                Thread.Sleep(refreshRate);
+                inputGrid.Transition();
+                WriteGrid(inputGrid, $"Step {ii}:", eachStep, gridLines, boxLines);
+            }
         }
 
+        private static void WriteGrid(
+                                        Grid grid,
+                                        string header = "Grid State:",
+                                        bool eachStep = false,
+                                        bool gridLines = false,
+                                        bool boxLines = false)
+        {
+            var gridOutput = grid.ToString(gridLines, boxLines).Split('\n');
+
+            var lineLength = gridOutput[0].Length;
+
+            if (!eachStep)
+            {
+                // NOTE: Shift console up rows (value + separator) plus header plus space
+                int newCursorRow = (Console.CursorTop - gridOutput.Length - 1) < 0 ? 0 : Console.CursorTop - gridOutput.Length - 1;
+                Console.SetCursorPosition(0, newCursorRow);
+
+                // Clear grid space
+                for (int i = 0; i < gridOutput.Length + 1; i++)
+                {
+                    var clearLineLength = i == 0 ? Console.WindowWidth : lineLength;
+                    Console.WriteLine(new string(' ', clearLineLength));
+                }
+
+                Console.SetCursorPosition(0, newCursorRow);
+            }
+
+            if (!string.IsNullOrEmpty(header))
+            {
+                Console.WriteLine(header);
+            }
+
+            // Grid
+            foreach (var line in gridOutput)
+            {
+                Console.WriteLine(line);
+            }
+        }
     }
 }
