@@ -5,21 +5,44 @@ namespace ConwaysGame
     /// Grid object
     public class Grid
     {
-        private List<List<int>> _grid { get; set; }
+        private int[,] _grid { get; set; }
 
         /// Length of the grid.
-        public int Length { get { return _grid.Count; } }
+        public int Length { get { return _grid.GetLength(0); } }
 
         /// Width of the grid.
-        public int Width { get { return _grid.Count == 0 ? 0 : _grid[0].Count; } }
+        public int Width { get { return _grid.GetLength(1); } }
+
+        private int[] GetRow(int rowIndex) {
+
+            var row = new int[this.Width];
+
+            for (int col = 0; col < this.Width; col++)
+            {
+                row[col] = _grid[rowIndex, col];
+            }
+
+            return row;
+        }
+
+        /// Grid as a multidimentional array.
+        public int[,] As2DArray()
+        {
+            return _grid;
+        }
 
         /// Grid as a list of lists.
-        public List<List<int>> As2DList() { return _grid; }
+        public List<List<int>> As2DList() {
+            return Enumerable.Range(0, this.Length)
+                    .Select(row => Enumerable.Range(0, this.Width)
+                        .Select(col => _grid[row, col]).ToList())
+                    .ToList();
+            }
 
         /// <summary>Default constructor for Grid.</summary>
         public Grid()
         {
-            _grid = new List<List<int>>();
+            _grid = new int[0,0];
         }
 
         /// <summary>Grid constructor with custom width, length, and seeded cells.</summary>
@@ -28,37 +51,26 @@ namespace ConwaysGame
             _grid = RandomValuesGrid(width, length, aliveCells);
         }
 
-        /// <summary>Generate a grid of randomly seeded cells.</summary>
-        private static List<List<int>> RandomValuesGrid(uint width, uint length, uint alive)
-        {
-            var randomCellsGrid = new List<List<int>>((int)length);
-
-            // Calculate the seconds between now and an arbitrary date to use as the seed value.
-            var timeSeed = (int)Math.Round((DateTime.Now - DateTime.Today).TotalSeconds);
-
-            var rando = new Random(timeSeed);
-
-            var gridCellCount = width * length;
-            var randoUpperBound = (int)(gridCellCount / alive);
-
-            for (int rr = 0; rr < length; rr++)
-            {
-                randomCellsGrid.Add(new List<int>((int)width));
-
-                for (int cc = 0; cc < width; cc++)
-                {
-                    var randomNumber = rando.Next(0, randoUpperBound);
-                    var cellValue = (int)Math.Round((double)((randomNumber + 1) / randoUpperBound));
-                    randomCellsGrid[rr].Add(cellValue);
-                }
-            }
-
-            return randomCellsGrid;
-        }
-
         /// <summary>Grid constructor using two dimentional list of int`.</summary>
         /// <param name="grid">Two dimentional list of int".</param>
         public Grid(List<List<int>> grid)
+        {
+            var gridArray = new int[grid.Count,grid[0].Count];
+
+            for (int row = 0; row < grid.Count; row++)
+            {
+                for (int column = 0; column < grid[0].Count; column++)
+                {
+                    gridArray[row,column] = grid[row][column];
+                }
+            }
+
+            _grid = gridArray;
+        }
+
+        /// <summary>Grid constructor using two dimentional array of int`.</summary>
+        /// <param name="grid">Two dimentional array of int".</param>
+        public Grid(int[,] grid)
         {
             this._grid = grid;
         }
@@ -82,6 +94,56 @@ namespace ConwaysGame
             }
 
             return true;
+        }
+
+        /// <summary>Generate a grid of randomly seeded cells.</summary>
+        private static int[,] RandomValuesGrid(uint width, uint length, uint alive)
+        {
+            var randomCellsGrid = new int[width, length];
+
+            // Short circuit special cases
+            if (alive == 0)
+            {
+                for (int row = 0; row < length; row++)
+                {
+                    for (int column = 0; column < width; column++)
+                    {
+                        randomCellsGrid[row,column] = 0;
+                    }
+                }
+                return randomCellsGrid;
+            }
+            else if (alive == (width * length))
+            {
+                for (int row = 0; row < length; row++)
+                {
+                    for (int column = 0; column < width; column++)
+                    {
+                        randomCellsGrid[row,column] = 1;
+                    }
+                }
+                return randomCellsGrid;
+            }
+
+            // Calculate the seconds between now and an arbitrary date to use as the seed value.
+            var timeSeed = (int)Math.Round((DateTime.Now - DateTime.Today).TotalSeconds);
+
+            var rando = new Random(timeSeed);
+
+            var gridCellCount = width * length;
+            var randoUpperBound = (int)(gridCellCount / alive);
+
+            for (int rr = 0; rr < length; rr++)
+            {
+                for (int cc = 0; cc < width; cc++)
+                {
+                    var randomNumber = rando.Next(0, randoUpperBound);
+                    var cellValue = (int)Math.Round((double)((randomNumber + 1) / randoUpperBound));
+                    randomCellsGrid[rr,cc] = cellValue;
+                }
+            }
+
+            return randomCellsGrid;
         }
 
         private static Grid parseGrid(string inputFileInfo, char[] delimeters)
@@ -127,77 +189,82 @@ namespace ConwaysGame
         /// <summary>Method to analyze the current state of the game grid and transition to the next state.</summary>
         public void Transition()
         {
-            var finalGrid = new List<List<int>>();
-
             // ASSUME: width is same for all rows
-            for (int rr = 0; rr < this.Length; rr++)
-            {
-                // Initialize new row in final grid
-                finalGrid.Add(new List<int>(this.Width));
+            var finalGridArr = new int[this.Width, this.Length];
 
-                for (int cc = 0; cc < this.Width; cc++)
+            for (int row = 0; row < this.Length; row++)
+            {
+                for (int column = 0; column < this.Width; column++)
                 {
                     var peers = new List<int>(8);
 
-                    if (rr - 1 >= 0)
+                    // TODO: Unused right now
+                    int leftOfCell = row > 0 ? row - 1 : row;
+                    int rightOfCell = row < this.Width ? row + 1 : row;
+
+                    // TODO: Unused right now
+                    int topOfCell = column > 0 ? column - 1 : column;
+                    int bottomOfCell = column < this.Length ? column + 1 : column;
+
+                    if (row - 1 >= 0)
                     {
-                        if (cc - 1 >= 0)
+                        if (column - 1 >= 0)
                         {
-                            peers.Add(_grid[rr - 1][cc - 1]);
+                            peers.Add(_grid[row - 1,column - 1]);
                         }
-                        peers.Add(_grid[rr - 1][cc]);
-                        if (cc + 1 < this.Width)
-                            peers.Add(_grid[rr - 1][cc + 1]);
+                        peers.Add(_grid[row - 1,column]);
+                        if (column + 1 < this.Width)
+                            peers.Add(_grid[row - 1,column + 1]);
                     }
 
-                    if (cc - 1 >= 0)
+                    if (column - 1 >= 0)
                     {
-                        peers.Add(_grid[rr][cc - 1]);
+                        peers.Add(_grid[row,column - 1]);
                     }
-                    if (cc + 1 < this.Width)
+                    if (column + 1 < this.Width)
                     {
-                        peers.Add(_grid[rr][cc + 1]);
+                        peers.Add(_grid[row,column + 1]);
                     }
 
-                    if (rr + 1 < this.Length)
+                    if (row + 1 < this.Length)
                     {
-                        if (cc - 1 >= 0)
+                        if (column - 1 >= 0)
                         {
-                            peers.Add(_grid[rr + 1][cc - 1]);
+                            peers.Add(_grid[row + 1,column - 1]);
                         }
-                        peers.Add(_grid[rr + 1][cc]);
-                        if (cc + 1 < this.Width)
+                        peers.Add(_grid[row + 1,column]);
+                        if (column + 1 < this.Width)
                         {
-                            peers.Add(_grid[rr + 1][cc + 1]);
+                            peers.Add(_grid[row + 1,column + 1]);
                         }
                     }
 
                     var peerCount = peers.Count(x => x == 1);
 
-                    if (_grid[rr][cc] == 1 && peerCount < 2)
+                    if (_grid[row,column] == 1 && peerCount < 2)
                     {
-                        finalGrid[rr].Add(0);
+                        finalGridArr[row,column] = 0;
                     }
-                    else if (_grid[rr][cc] == 1 && (peerCount == 2 || peerCount == 3))
+                    else if (_grid[row,column] == 1 && (peerCount == 2 || peerCount == 3))
                     {
-                        finalGrid[rr].Add(1);
+                        finalGridArr[row,column] = 1;
                     }
-                    else if (_grid[rr][cc] == 1 && (peerCount >= 3))
+                    else if (_grid[row,column] == 1 && (peerCount >= 3))
                     {
-                        finalGrid[rr].Add(0);
+                        finalGridArr[row,column] = 0;
                     }
-                    else if (_grid[rr][cc] == 0 && (peerCount == 3))
+                    else if (_grid[row,column] == 0 && (peerCount == 3))
                     {
-                        finalGrid[rr].Add(1);
+                        finalGridArr[row,column] = 1;
                     }
                     else
                     {
-                        finalGrid[rr].Add(0);
+                        finalGridArr[row,column] = 0;
                     }
                 }
             }
 
-            _grid = finalGrid;
+            _grid = finalGridArr;
         }
 
         /// <summary>Returns a string representation of the grid.</summary>
@@ -205,15 +272,15 @@ namespace ConwaysGame
         {
             string output = string.Empty;
 
-            var lineLength = gridLines ? _grid.Count * 4 : _grid.Count * 2;
+            var lineLength = gridLines ? this.Width * 4 : this.Width * 2;
 
             var columnSeparator = gridLines ? " | " : " ";
             var boxVerticalLine = boxLines ? "|" : string.Empty;
             var boxHorizontalLine = '-';
 
-            for (var rr = 0; rr < _grid.Count; rr++)
+            for (var rr = 0; rr < this.Length; rr++)
             {
-                var joinedDataRow = String.Join(columnSeparator, _grid[rr]);
+                var joinedDataRow = String.Join(columnSeparator, this.GetRow(rr));
                 var formattedDataRow = String.Concat(boxVerticalLine, ' ', joinedDataRow, ' ', boxVerticalLine, '\n');
                 // TODO: string replace not optimal for large grids
                 formattedDataRow = formattedDataRow.Replace('0', ' ');
@@ -221,7 +288,7 @@ namespace ConwaysGame
 
                 output += string.Concat(formattedDataRow);
 
-                if (gridLines && rr < (_grid.Count - 1))
+                if (gridLines && rr < (this.Length - 1))
                 {
                     var tableRow = formattedDataRow;
                     // TODO: string replace not optimal for large grids

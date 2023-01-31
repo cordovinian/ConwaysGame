@@ -37,18 +37,11 @@ namespace ConwaysGame
                                 bool gridLines = false,
                                 bool boxLines = false)
         {
-            var inputGrid = new Grid();
+            Grid inputGrid;
 
             Console.CursorVisible = false;
 
-            if (input == null && width == 0 && length == 0 && alive == 0 )
-            {
-                inputGrid = new Grid(oscillatingBlinkerGrid);
-
-                Console.WriteLine("Default Grid - 'Blinker'");
-                WriteGrid(inputGrid, "Default State:", eachStep: true, gridLines, boxLines);
-            }
-            else if (input == null && width != null && length != null && alive != null)
+            if (input == null && width != null && length != null && alive != null)
             {
                 inputGrid = new Grid((uint)width, (uint)length, (uint)alive);
 
@@ -72,6 +65,13 @@ namespace ConwaysGame
 
                 Console.WriteLine($"From file - '{input.Name}'");
                 WriteGrid(inputGrid, $"Initial State:", eachStep: true, gridLines, boxLines);
+            }
+            else
+            {
+                inputGrid = new Grid(oscillatingBlinkerGrid);
+
+                Console.WriteLine("Default Grid - 'Blinker'");
+                WriteGrid(inputGrid, "Default State:", eachStep: true, gridLines, boxLines);
             }
 
             for (var ii = 1; ii <= iterations; ii++)

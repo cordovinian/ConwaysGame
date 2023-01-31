@@ -8,16 +8,21 @@ public class ConwaysGameTests : ConwaysGameClass {}
 public class GridTests : Grid
 {
     [Fact]
-    public void Grid_ReturnsEmptyGrid()
+    public void Grid_ReturnsZerosGrid()
     {
         // Given & when
-        var newGrid = new Grid();
+        var newGrid = new Grid(3, 3, 0);
         var gridAs2DList = newGrid.As2DList();
+        var expectedGrid = new int[3,3] {
+            {0,0,0},
+            {0,0,0},
+            {0,0,0}
+        };
 
         // Then
-        newGrid.Width.Should().Be(0);
-        newGrid.Length.Should().Be(0);
-        gridAs2DList.Should().BeEmpty();
+        newGrid.Width.Should().Be(3);
+        newGrid.Length.Should().Be(3);
+        newGrid.As2DArray().Should().BeEquivalentTo(expectedGrid);
     }
 
     [Fact]
@@ -74,7 +79,7 @@ public class GridTests : Grid
     public void TryParseGrid_ReturnsGridAndSucess()
     {
         // Given
-        var actualGrid = new Grid();
+        Grid actualGrid;
         var file = new FileInfo("GridSamples/Oscillator-Blinker.txt");
         var expectedGrid = new List<List<int>>{
             new List<int>{ 0, 0, 0 },
