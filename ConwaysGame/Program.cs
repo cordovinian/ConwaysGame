@@ -18,6 +18,9 @@ namespace ConwaysGame
         /// Plays Conway's game of life for a number of iterations.
         /// </summary>
         /// <param name="input">The name of the input file to set as the starting grid state.</param>
+        /// <param name="width">The width of the grid.</param>
+        /// <param name="length">The length (height) of the grid.</param>
+        /// <param name="alive">The expected number of cell that start alive.</param>
         /// <param name="iterations">The number of game iterations to go through.</param>
         /// <param name="refreshRate">How fast to recalculate next grid.</param>
         /// <param name="eachStep">Enable to display each iteration step.</param>
@@ -25,6 +28,9 @@ namespace ConwaysGame
         /// <param name="boxLines">Enable showing bounding box lines.</param>
         public static void Main(
                                 FileInfo input,
+                                uint? width = 10,
+                                uint? length = 10,
+                                uint? alive = 10,
                                 int iterations = 20,
                                 int refreshRate = 100,
                                 bool eachStep = false,
@@ -35,11 +41,18 @@ namespace ConwaysGame
 
             Console.CursorVisible = false;
 
-            if (input == null)
+            if (input == null && width == 0 && length == 0 && alive == 0 )
             {
                 inputGrid = new Grid(oscillatingBlinkerGrid);
 
                 Console.WriteLine("Default Grid - 'Blinker'");
+                WriteGrid(inputGrid, "Default State:", eachStep: true, gridLines, boxLines);
+            }
+            else if (input == null && width != null && length != null && alive != null)
+            {
+                inputGrid = new Grid((uint)width, (uint)length, (uint)alive);
+
+                Console.WriteLine($"Seeded Grid - W:{width} L:{length} A:{alive}");
                 WriteGrid(inputGrid, "Default State:", eachStep: true, gridLines, boxLines);
             }
             else if (input != null)

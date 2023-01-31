@@ -22,6 +22,40 @@ namespace ConwaysGame
             _grid = new List<List<int>>();
         }
 
+        /// <summary>Grid constructor with custom width, length, and seeded cells.</summary>
+        public Grid(uint width, uint length, uint aliveCells)
+        {
+            _grid = RandomValuesGrid(width, length, aliveCells);
+        }
+
+        /// <summary>Generate a grid of randomly seeded cells.</summary>
+        private static List<List<int>> RandomValuesGrid(uint width, uint length, uint alive)
+        {
+            var randomCellsGrid = new List<List<int>>((int)length);
+
+            // Calculate the seconds between now and an arbitrary date to use as the seed value.
+            var timeSeed = (int)Math.Round((DateTime.Now - DateTime.Today).TotalSeconds);
+
+            var rando = new Random(timeSeed);
+
+            var gridCellCount = width * length;
+            var randoUpperBound = (int)(gridCellCount / alive);
+
+            for (int rr = 0; rr < length; rr++)
+            {
+                randomCellsGrid.Add(new List<int>((int)width));
+
+                for (int cc = 0; cc < width; cc++)
+                {
+                    var randomNumber = rando.Next(0, randoUpperBound);
+                    var cellValue = (int)Math.Round((double)((randomNumber + 1) / randoUpperBound));
+                    randomCellsGrid[rr].Add(cellValue);
+                }
+            }
+
+            return randomCellsGrid;
+        }
+
         /// <summary>Grid constructor using two dimentional list of int`.</summary>
         /// <param name="grid">Two dimentional list of int".</param>
         public Grid(List<List<int>> grid)

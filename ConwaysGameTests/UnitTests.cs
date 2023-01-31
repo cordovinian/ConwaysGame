@@ -3,33 +3,7 @@ using FluentAssertions;
 
 namespace ConwaysGameTests;
 
-public class ConwaysGameTests : ConwaysGameClass
-{
-    /*
-    [Fact]
-    public void Transition_ReturnsCorrectGrid()
-    {
-        // given
-        var startGrid = new List<List<int>>{
-            new List<int> { 0, 0, 0},
-            new List<int> { 1, 1, 1},
-            new List<int> { 0, 0, 0},
-        };
-
-        var expectedGrid = new List<List<int>>{
-            new List<int> { 0, 1, 0},
-            new List<int> { 0, 1, 0},
-            new List<int> { 0, 1, 0},
-        };
-
-        // When
-        var endGrid = ConwaysGameClass.Transition(startGrid);
-
-        // Then
-        endGrid.Should().BeEquivalentTo(expectedGrid);
-    }
-    */
-}
+public class ConwaysGameTests : ConwaysGameClass {}
 
 public class GridTests : Grid
 {
@@ -66,6 +40,35 @@ public class GridTests : Grid
         actualAs2DList.Should().BeEquivalentTo(expectedGrid);
     }
 
+    /// Note: This test has the potential to be very flakey
+    [Theory]
+    [InlineData(10, 10, 10)]
+    [InlineData(10, 10, 3)]
+    [InlineData(10, 10, 8)]
+    [InlineData(100, 100, 80)]
+    public void Grid_WithSeedValues_ReturnsRandomizedGrid(uint width, uint length, uint aliveCells)
+    {
+        // Given
+        // NOTE: Starting values set in theory
+        var twentyPercent = (int)Math.Round(aliveCells*0.2);
+        if (twentyPercent < 5)
+        {
+            twentyPercent = 5;
+        }
+        var aliveLowerEnd = aliveCells - twentyPercent;
+        var aliveUpperEnd = aliveCells + twentyPercent;
+
+        // When
+        var actualGrid = new Grid(width, length, aliveCells);
+        var actualGridAs2DList = actualGrid.As2DList();
+        var allGridValues = actualGridAs2DList.SelectMany(x => x).ToList();
+
+        // Then
+        actualGrid.Width.Should().Be((int)width);
+        actualGrid.Length.Should().Be((int)length);
+        actualGridAs2DList.Should().BeOfType<List<List<int>>?>();
+        allGridValues.Count(i => i == 1).Should().BeInRange((int)aliveLowerEnd, (int)aliveUpperEnd);
+    }
 
     [Fact]
     public void TryParseGrid_ReturnsGridAndSucess()
