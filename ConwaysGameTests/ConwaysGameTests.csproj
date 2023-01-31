@@ -26,4 +26,10 @@
     <ProjectReference Include="..\ConwaysGame\ConwaysGame.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\GridSamples\*.*" TargetPath="GridSamples\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
